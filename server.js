@@ -63,7 +63,7 @@ app.get('/download/:filename', async (req, res) => {
     }
 
     // Fetch from S3
-    const params = { Bucket: process.env.S3_S3_BUCKET_NAME, Key: filename };
+    const params = { Bucket: process.env.S3_BUCKET_NAME, Key: filename };
     const data = await s3.getObject(params).promise();
 
     // Save in Redis cache
