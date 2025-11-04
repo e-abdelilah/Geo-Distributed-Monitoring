@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const AWS = require('aws-sdk');
 const Redis = require('ioredis');
+const promClient = require('prom-client');
 const path = require('path');
 
 const app = express();
@@ -81,6 +82,11 @@ app.get('/download/:filename', async (req, res) => {
   }
 });
 
+// Prometheus metrics endpoint
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', promClient.register.contentType);
+  res.end(await promClient.register.metrics());
+});
 
 // Start server
 app.listen(port, () => {
