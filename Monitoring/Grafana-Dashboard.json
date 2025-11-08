@@ -1,0 +1,121 @@
+{
+"annotations": { "list": [] },
+"editable": true,
+"panels": [
+{
+"id": 1,
+"type": "bargauge",
+"title": "Top 3 Popular Files per Region",
+"datasource": "Prometheus",
+"targets": [
+{
+"expr": "topk(3, sum by (filename, region) (rate(file_view_total[5m])))",
+"legendFormat": "{{filename}} ({{region}})",
+"refId": "A"
+}
+],
+"fieldConfig": {
+"defaults": {
+"unit": "requests/sec",
+"color": { "mode": "palette-classic" },
+"custom": { "displayMode": "gradient", "orientation": "horizontal" }
+}
+},
+"options": { "displayMode": "gradient", "orientation": "horizontal", "showUnfilled": true },
+"gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+},
+{
+"id": 2,
+"type": "timeseries",
+"title": "Cache Efficiency Over Time",
+"datasource": "Prometheus",
+"targets": [
+{ "expr": "sum(rate(cache_hits_total[5m])) by (region)", "legendFormat": "Hits - {{region}}", "refId": "A" },
+{ "expr": "sum(rate(cache_misses_total[5m])) by (region)", "legendFormat": "Misses - {{region}}", "refId": "B" }
+],
+"fieldConfig": { "defaults": { "unit": "requests/sec" } },
+"gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+},
+{
+"id": 3,
+"type": "timeseries",
+"title": "Latency by Region / Cache Status",
+"datasource": "Prometheus",
+"targets": [
+{
+"expr": "histogram_quantile(0.95, sum(rate(file_request_duration_seconds_bucket[5m])) by (le, region, cache_status))",
+"legendFormat": "{{region}} - {{cache_status}} (p95)",
+"refId": "A"
+}
+],
+"fieldConfig": { "defaults": { "unit": "s" } },
+"gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 }
+},
+{
+"id": 4,
+"type": "gauge",
+"title": "CPU Usage by Region",
+"datasource": "Prometheus",
+"targets": [
+{
+"expr": "avg by (region) (1 - rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100",
+"legendFormat": "{{region}}",
+"refId": "A"
+}
+],
+"fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 } },
+"gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 }
+},
+{
+"id": 5,
+"type": "gauge",
+"title": "Memory Usage by Region",
+"datasource": "Prometheus",
+"targets": [
+{
+"expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+"legendFormat": "{{region}}",
+"refId": "A"
+}
+],
+"fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 } },
+"gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 }
+},
+{
+"id": 6,
+"type": "gauge",
+"title": "Disk Usage by Region",
+"datasource": "Prometheus",
+"targets": [
+{
+"expr": "(1 - (node_filesystem_free_bytes{fstype!="tmpfs"} / node_filesystem_size_bytes{fstype!="tmpfs"})) * 100",
+"legendFormat": "{{region}}",
+"refId": "A"
+}
+],
+"fieldConfig": { "defaults": { "unit": "percent", "min": 0, "max": 100 } },
+"gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 }
+}
+],
+"templating": {
+"list": [
+{
+"name": "region",
+"type": "query",
+"label": "Region",
+"datasource": "Prometheus",
+"query": "label_values(region)",
+"refresh": 1,
+"current": { "text": "All", "value": ".*" },
+"regex": "",
+"includeAll": true,
+"multi": true
+}
+]
+},
+"title": "Geo-Distributed Monitoring Dashboard",
+"version": 1,
+"schemaVersion": 36,
+"refresh": "10s",
+"time": { "from": "now-1h", "to": "now" }
+}
